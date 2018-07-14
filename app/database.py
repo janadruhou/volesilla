@@ -7,11 +7,36 @@ from app.extensions import DB, UUID
 
 
 class Internal(DB.Model):
-    """User data model"""
+    """Scheme versions"""
 
     uid = DB.Column(UUID, primary_key=True, default=uuid.uuid4)
     db_version = DB.Column(DB.Integer, nullable=False)
     updated_at = DB.Column(DB.DateTime())
+
+
+class AccessRight(DB.Model):
+    """Access rights"""
+
+    uid = DB.Column(UUID, primary_key=True, default=uuid.uuid4)
+    name = DB.Column(DB.String(50), nullable=False, unique=True)
+    section = DB.Column(DB.String(50), nullable=False, unique=True)
+    type = DB.Column(DB.String(50), nullable=False, unique=True)
+    description = DB.Column(DB.String(255), nullable=False, unique=True)
+
+
+class UserRole(DB.Model):
+    """User Roles"""
+
+    uid = DB.Column(UUID, primary_key=True, default=uuid.uuid4)
+    name = DB.Column(DB.String(50), nullable=False, unique=True)
+
+
+class RoleRight(DB.Model):
+    """Connection roles <--> rights"""
+
+    uid = DB.Column(UUID, primary_key=True, default=uuid.uuid4)
+    role_uid = DB.Column(UUID, nullable=False, unique=True)
+    right_uid = DB.Column(UUID, nullable=False, unique=True)
 
 
 class User(DB.Model):
