@@ -14,13 +14,13 @@ class Internal(DB.Model):
     updated_at = DB.Column(DB.DateTime())
 
 
-class AccessRight(DB.Model):
+class Rights(DB.Model):
     """Access rights"""
 
     uid = DB.Column(UUID, primary_key=True, default=uuid.uuid4)
     name = DB.Column(DB.String(50), nullable=False, unique=True)
-    section = DB.Column(DB.String(50), nullable=False, unique=True)
-    type = DB.Column(DB.String(50), nullable=False, unique=True)
+    group = DB.Column(DB.String(50), nullable=False, unique=True)
+    permission = DB.Column(DB.String(50), nullable=False, unique=True)
     description = DB.Column(DB.String(255), nullable=False, unique=True)
 
 

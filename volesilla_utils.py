@@ -4,6 +4,7 @@ Usage:
   volesilla_utils.py db_init <db_file>
   volesilla_utils.py check <db_file>
   volesilla_utils.py db_add_user <db_file> <user_mail>
+  volesilla_tuils.py create_rights <db_file>
   volesilla_utils.py (-h | --help)
 Options:
   -t                Testing environment
@@ -16,13 +17,46 @@ import sys
 import uuid
 from datetime import datetime
 from docopt import docopt
+import yaml
 from flask.helpers import get_debug_flag
 
 from app.app import create_app
 from app.settings import DevConfig, ProdConfig, TestConfig
 from app.extensions import DB, BCRYPT
+from app.author import get_rights_name
 
-from app.database import Internal, User
+from app.database import Internal, Rights, User
+
+
+def create_access_rights(config):
+    """Create access rights"""
+
+    with open('rights.yaml', 'r') as stream:
+        roles_rights = yaml.load(stream)
+
+    if not os.path.isfile(config.DB_FILE):
+        print('[WARNING] File [{}] doesn\'t exist.'.format(config.DB_FILE))
+        sys.exit(1)
+
+    app = create_app(config_object=config)
+
+    with app.app_context():
+        DB.init_app(app)
+
+        for group in roles_rights['rights']:
+            for rule in roles_rights['rights'][group]:
+                for role in rule['roles']:
+
+                    rights = Rights(
+                        group=group,
+                        permission=rule['permission'],
+                        description=rule['description'],
+                    )
+
+                    DB.session.add(rights)
+    
+        DB.session.commit()
+
 
 
 def db_init(config):
@@ -124,6 +158,8 @@ def main():  # pylint: disable=too-many-statements
 
     config.DB_FILE = args['<db_file>']
     config.SQLALCHEMY_DATABASE_URI = 'sqlite:///{0}'.format(config.DB_FILE)
+    print(config.DB_FILE, type(config.DB_FILE))
+
 
     if args['db_init']:
         db_init(config)
@@ -133,6 +169,9 @@ def main():  # pylint: disable=too-many-statements
 
     if args['db_add_user']:
         db_add_user(config, args['<user_mail>'])
+
+    if args['create_rights']:
+        create_access_rights(config)
 
 
 if __name__ == '__main__':
